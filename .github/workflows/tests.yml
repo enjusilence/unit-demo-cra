@@ -1,21 +1,44 @@
-name: Tests
+name: Tests and Commitlint
 
 on: [pull_request]
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest'
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Install dependencies
         run: |
           npm ci
-          npx playwright install
+          npx playwright install --with-deps
           npx jest --version
           npx playwright --version
       - name: Run tests
         run: |
           npm run test-ci
           npm run e2e-ci
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install commitlint
+        run: |
+          npm ci
+          npx commitlint --version
+      - name: Validate current commit (last commit) with commitlint
+        # if: github.event_name == 'push'
+        run: npx commitlint --from HEAD~1 --to HEAD --verbose
+
+      # - name: Validate PR commits with commitlint
+      #   if: github.event_name == 'pull_request'
+      #   run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
