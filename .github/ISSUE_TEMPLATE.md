@@ -4,6 +4,6 @@ labels: RELEASE
 ---
 
 author: {{ env.AUTHOR }}
-date: {{ date('dddd, MMMM Do') }}
+date: {{ env.DATE }}
 Changelog:
 {{ env.CHANGELOG }}

@@ -6,7 +6,6 @@ on:
     - 'v[0-9]+'
 
 permissions:
-  contents: read
   issues: write 
 
 jobs:
@@ -44,6 +43,7 @@ jobs:
           TAG: ${{ github.ref_name }}
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+          DATE: date +'%d.%m.%Y %H:%M:%S'
         with:
           assignees: ${{ github.actor }}
           update_existing: true
