@@ -5,10 +5,17 @@ on:
     tags:
     - 'v[0-9]+'
 
+permissions:
+  contents: read
+  issues: write 
+
 jobs:
-  create_branch:
+  run-test:
+    uses: ./.github/workflows/tests.yml
+
+  create-branch:
+    needs: run-test
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' }}  
     steps:
       - uses: actions/checkout@v3
         with:
@@ -17,6 +24,31 @@ jobs:
         run: |
           git checkout -b release-${{ github.ref_name }}
           git push -u origin release-${{ github.ref_name }}
+
+  create-issue:
+    needs: run-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.1.0
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          AUTHOR: ${{ github.actor }}
+          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+        with:
+          assignees: ${{ github.actor }}
+          update_existing: true
+          search_existing: all
+        
 
   # build:
   #   runs-on: ubuntu-latest
