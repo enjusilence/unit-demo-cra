@@ -22,10 +22,12 @@ jobs:
       - name: Get version
         id: version
         run: |
-          if [github.ref_type = "branch"]; then
-            echo "version=${prevTag}" >> $GITHUB_OUTPUT
+          VERSION=${{ github.ref_name }}
+          if [${{ github.ref_type }} = "branch"]; then
+            VERSION=${VERSION:8}
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
           fi
 
       - name: Create new branch
