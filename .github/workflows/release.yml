@@ -99,5 +99,7 @@ jobs:
     needs: release
     steps:
       - name: Deploy to GitHub Pages
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
         id: deployment
         uses: actions/deploy-pages@v2
