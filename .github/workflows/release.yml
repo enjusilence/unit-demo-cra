@@ -30,7 +30,8 @@ jobs:
 
       - name: Create new branch
         run: |
-          git checkout -b release-${{ steps.version.outputs.version }}
+          BRANCH = release-${{ steps.version.outputs.version }}
+          git checkout BRANCH 2>/dev/null || git checkout -b BRANCH
           git push -u origin release-${{ steps.version.outputs.version }}
 
       - name: Generate changelog
