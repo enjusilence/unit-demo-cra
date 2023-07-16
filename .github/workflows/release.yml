@@ -23,6 +23,7 @@ jobs:
 
   create-issue:
     needs: run-test
+    if: ${{ !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -52,6 +53,7 @@ jobs:
         
   build:
     needs: run-test
+    if: ${{ !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
