@@ -48,7 +48,7 @@ jobs:
           TAG: ${{ steps.version.outputs.version }}
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
-          STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
+          STATUS: ${{ contains(needs.*.result, 'failure') && '🚫Failure' || '✅Success!' }}
           WORKFLOW: ${{github.server_url}}/${{ github.repository }}/actions/runs/${{github.run_id}}
         with:
           assignees: ${{ github.actor }}
