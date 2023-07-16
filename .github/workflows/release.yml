@@ -4,6 +4,8 @@ on:
   push:
     tags:
     - 'v[0-9]+'
+    branches:
+    - 'release-*'
 
 jobs:
   run-test:
@@ -21,13 +23,6 @@ jobs:
         run: |
           git checkout -b release-${{ github.ref_name }}
           git push -u origin release-${{ github.ref_name }}
-
-  create-issue:
-    needs: run-test
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
       - name: Generate changelog
         id: changelog
