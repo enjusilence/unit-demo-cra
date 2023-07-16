@@ -61,19 +61,26 @@ jobs:
         run: gh issue close ${{ steps.create-issue.outputs.number }}
 
       - name: Install node
-        if: ${{ !contains(needs.*.result, 'failure') }}
+        if: success()
         uses: actions/setup-node@v3
         with:
           node-version: '18'
       - name: Make build
-        if: ${{ !contains(needs.*.result, 'failure') }}
+        if: success()
         run: |
           npm ci
           npm run build
       - name: Publish release
-        if: ${{ !contains(needs.*.result, 'failure') }}
+        if: success()
         uses: ncipollo/release-action@v1
         with:
           body: ${{ steps.changelog.outputs.changelog }}
           allowUpdates: true,
           tag: ${{ steps.version.outputs.version }}
+
+      - name: Deploy to Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
