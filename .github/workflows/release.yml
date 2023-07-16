@@ -23,7 +23,9 @@ jobs:
         id: version
         run: |
           VERSION=${{ github.ref_name }}
-          [ "${{ github.ref_type }}" = "branch" ] && VERSION=${VERSION:8}
+          if [ "${{ github.ref_type }}" = "branch" ]; then
+            VERSION=${VERSION:8}
+          fi
 
       - name: Create new branch
         run: |
