@@ -95,11 +95,13 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions: 
+      contents: read
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     needs: release
     steps:
       - name: Deploy to GitHub Pages
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
         id: deployment
         uses: actions/deploy-pages@v2
