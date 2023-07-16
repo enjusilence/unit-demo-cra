@@ -8,6 +8,8 @@ import { Provider } from "react-redux";
 
 import { initStore } from "./store";
 import { Application } from "./Application";
+import { CONDITION } from "../condition";
+import { act } from "react-dom/test-utils";
 
 it('по адресу /about должна открываться страница "о проекте"', () => {
   const store = initStore();
@@ -36,11 +38,17 @@ it("если добавить элемент, он появляется в сп�
 
   const { getByTestId, getAllByTestId } = render(application);
 
-  await events.type(getByTestId("input-add"), "Сделать домашку");
-
-  await events.click(getByTestId("button-add"));
-
+  await act(async () => {
+    await events.type(getByTestId("input-add"), "Сделать домашку");
+  
+    await events.click(getByTestId("button-add"));
+  })
+  
   const items = getAllByTestId("list-item");
 
   expect(items.map((el) => el.textContent)).toContain("Сделать домашку");
 });
+
+it("Условие должно быть верным", () => {
+  expect(CONDITION).toBeTruthy();
+})

@@ -4,32 +4,35 @@ on:
   push:
     tags:
     - 'v[0-9]+'
-
-permissions:
-  contents: read
-  issues: write 
+    branches:
+    - 'release-*'
 
 jobs:
   run-test:
     uses: ./.github/workflows/tests.yml
 
-  create-branch:
+  release:
     needs: run-test
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version
+        id: version
+        run: |
+          VERSION=${{ github.ref_name }}
+          if [ "${{ github.ref_type }}" = "branch" ]; then
+            VERSION=${VERSION:8}
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Create new branch
         run: |
-          git checkout -b release-${{ github.ref_name }}
-          git push -u origin release-${{ github.ref_name }}
-
-  create-issue:
-    needs: run-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+          BRANCH=release-${{ steps.version.outputs.version }}
+          git checkout ${BRANCH} 2>/dev/null || git checkout -b ${BRANCH}
+          git push -u origin release-${{ steps.version.outputs.version }}
 
       - name: Generate changelog
         id: changelog
@@ -38,27 +41,67 @@ jobs:
           myToken: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Create issue
+        id: create-issue
         uses: JasonEtco/create-an-issue@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.version.outputs.version }}
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+          STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
+          WORKFLOW: ${{github.server_url}}/${{ github.repository }}/actions/runs/${{github.run_id}}
         with:
           assignees: ${{ github.actor }}
           update_existing: true
           search_existing: all
-        
+      - name: Close issue
+        if: ${{ !contains(needs.*.result, 'failure') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh issue close ${{ steps.create-issue.outputs.number }}
 
-  # build:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: write
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #     with:
-  #       fetch-depth: 0
-  #   - uses: ncipollo/release-action@v1
-  #     with:
-  #       generateReleaseNotes: true,
-  #       allowUpdates: true,
+      - name: Install node
+        if: success()
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Make build
+        if: success()
+        run: |
+          npm ci
+          npm run build
+      - name: Publish release
+        if: success()
+        uses: ncipollo/release-action@v1
+        with:
+          body: ${{ steps.changelog.outputs.changelog }}
+          allowUpdates: true,
+          tag: ${{ steps.version.outputs.version }}
+
+      - name: Setup Pages
+        if: success()
+        uses: actions/configure-pages@v3
+      - name: Build with Jekyll
+        if: success()
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./build
+          destination: ./_site
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-pages-artifact@v2
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions: 
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
