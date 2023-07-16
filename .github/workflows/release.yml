@@ -30,7 +30,8 @@ jobs:
 
       - name: Create new branch
         run: |
-          git checkout -b release-${{ steps.version.outputs.version }}
+          BRANCH=release-${{ steps.version.outputs.version }}
+          git checkout ${BRANCH} 2>/dev/null || git checkout -b ${BRANCH}
           git push -u origin release-${{ steps.version.outputs.version }}
 
       - name: Generate changelog
@@ -48,7 +49,7 @@ jobs:
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
           STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
-          # WORKFLOW: 
+          WORKFLOW: ${{github.server_url}}/${{ github.repository }}/actions/runs/${{github.run_id}}
         with:
           assignees: ${{ github.actor }}
           update_existing: true
@@ -73,6 +74,6 @@ jobs:
         if: ${{ !contains(needs.*.result, 'failure') }}
         uses: ncipollo/release-action@v1
         with:
-          generateReleaseNotes: true,
+          body: ${{ steps.changelog.outputs.changelog }}
           allowUpdates: true,
           tag: ${{ steps.version.outputs.version }}
