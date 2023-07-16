@@ -74,6 +74,6 @@ jobs:
         if: ${{ !contains(needs.*.result, 'failure') }}
         uses: ncipollo/release-action@v1
         with:
-          generateReleaseNotes: true,
+          body: ${{ steps.changelog.outputs.changelog }}
           allowUpdates: true,
           tag: ${{ steps.version.outputs.version }}
