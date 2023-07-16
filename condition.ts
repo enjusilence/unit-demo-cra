@@ -1,1 +1,1 @@
-export const CONDITION = false;
+export const CONDITION = true;
