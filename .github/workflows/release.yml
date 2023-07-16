@@ -24,7 +24,7 @@ jobs:
 
   create-issue:
     needs: run-test
-    if: ${{ !contains(needs.*.result, 'failure') }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,18 +43,19 @@ jobs:
           TAG: ${{ github.ref_name }}
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+          STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
         with:
           assignees: ${{ github.actor }}
           update_existing: true
           search_existing: all
       - name: Close issue
+        if: ${{ !contains(needs.*.result, 'failure') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh issue close ${{ steps.create-issue.outputs.number }}
         
   build:
     needs: run-test
-    if: ${{ !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
