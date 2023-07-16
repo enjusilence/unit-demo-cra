@@ -6,13 +6,27 @@ on:
     - 'v[0-9]+'
 
 jobs:
-  build:
+  create_branch:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    if: github.ref == 'refs/heads/master'  
     steps:
-    - uses: actions/checkout@v3
-    - uses: ncipollo/release-action@v1
-      with:
-        generateReleaseNotes: true,
-        allowUpdates: true,
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new branch
+        run: |
+          git checkout -b release-${{ github.ref_name }}
+          git push -u origin release-${{ github.ref_name }}
+
+  # build:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       fetch-depth: 0
+  #   - uses: ncipollo/release-action@v1
+  #     with:
+  #       generateReleaseNotes: true,
+  #       allowUpdates: true,
