@@ -67,4 +67,3 @@ jobs:
         with:
           generateReleaseNotes: true,
           allowUpdates: true,
-          artifacts: './build'
