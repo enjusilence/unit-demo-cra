@@ -30,7 +30,7 @@ jobs:
 
       - name: Create new branch
         run: |
-          BRANCH = release-${{ steps.version.outputs.version }}
+          BRANCH = ${release-${{ steps.version.outputs.version }}}
           git checkout ${BRANCH} 2>/dev/null || git checkout -b ${BRANCH}
           git push -u origin release-${{ steps.version.outputs.version }}
 
@@ -49,7 +49,7 @@ jobs:
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
           STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
-          # WORKFLOW: 
+          WORKFLOW: ${{github.server_url}}/${{ github.repository }}/actions/runs/${{github.run_id}}
         with:
           assignees: ${{ github.actor }}
           update_existing: true
