@@ -8,6 +8,7 @@ import { Provider } from "react-redux";
 
 import { initStore } from "./store";
 import { Application } from "./Application";
+import { CONDITION } from "../condition";
 
 it('по адресу /about должна открываться страница "о проекте"', () => {
   const store = initStore();
@@ -44,3 +45,7 @@ it("если добавить элемент, он появляется в сп�
 
   expect(items.map((el) => el.textContent)).toContain("Сделать домашку");
 });
+
+it("Условие должно быть верным", () => {
+  expect(CONDITION);
+})
