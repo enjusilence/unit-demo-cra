@@ -45,6 +45,7 @@ jobs:
           AUTHOR: ${{ github.actor }}
           CHANGELOG: ${{ steps.changelog.outputs.changelog }}
           STATUS: ${{ contains(needs.*.result, 'failure') && 'Failure' || 'Success' }}
+          # WORKFLOW: 
         with:
           assignees: ${{ github.actor }}
           update_existing: true
@@ -54,23 +55,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh issue close ${{ steps.create-issue.outputs.number }}
-        
-  build:
-    needs: run-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v3
+
+      - name: Install node
+        if: ${{ !contains(needs.*.result, 'failure') }}
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
       - name: Make build
+        if: ${{ !contains(needs.*.result, 'failure') }}
         run: |
           npm ci
           npm run build
       - name: Publish release
+        if: ${{ !contains(needs.*.result, 'failure') }}
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true,
           allowUpdates: true,
+          tag: ${{ steps.version.outputs.version }}

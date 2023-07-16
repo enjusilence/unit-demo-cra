@@ -4,6 +4,8 @@ labels: RELEASE
 ---
 
 STATUS: {{ env.STATUS }}
+<!-- Check workflow: {{ env.WORKFLOW }} -->
+
 Author: {{ env.AUTHOR }}
 Date: {{ date | date('dddd, MMMM Do') }}
 Changelog:
