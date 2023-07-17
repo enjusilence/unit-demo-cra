@@ -1,7 +1,8 @@
 ## Привет, проверяющий!
 Небольшая памятка-подсказка чтобы пройтись по всем требованиям.
 
-Адрес сайта на GH Pages: https://enjusilence.github.io/unit-demo-cra/
+Адрес сайта на GH Pages: https://enjusilence.github.io/unit-demo-cra
+
 Для падения unit-тестов замени в 'condition.ts' `CONDITION = false`
 
 1. Commitlint
