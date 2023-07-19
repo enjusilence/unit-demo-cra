@@ -61,12 +61,12 @@ jobs:
         run: gh issue close ${{ steps.create-issue.outputs.number }}
 
       - name: Install node
-        if: success()
+        if: ${{ !contains(needs.*.result, 'failure') }}
         uses: actions/setup-node@v3
         with:
           node-version: '18'
       - name: Make build
-        if: success()
+        if: ${{ !contains(needs.*.result, 'failure') }}
         run: |
           npm ci
           npm run build
@@ -79,16 +79,16 @@ jobs:
           tag: ${{ steps.version.outputs.version }}
 
       - name: Setup Pages
-        if: success()
+        if: ${{ !contains(needs.*.result, 'failure') }}
         uses: actions/configure-pages@v3
       - name: Build with Jekyll
-        if: success()
+        if: ${{ !contains(needs.*.result, 'failure') }}
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./build
           destination: ./_site
       - name: Upload artifact
-        if: success()
+        if: ${{ !contains(needs.*.result, 'failure') }}
         uses: actions/upload-pages-artifact@v2
 
   deploy:
